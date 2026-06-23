@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "TeraVersa Attendance Scraper",
+  "version": "1.0",
+  "description": "Ekstensi khusus untuk melakukan scraping dan rekapitulasi kehadiran mahasiswa di portal TeraVersa Unsoed.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://teraversa.unsoed.ac.id/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://teraversa.unsoed.ac.id/*",
+        "file:///*"
+      ],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TeraVersa Attendance Scraper"
+  }
+}
