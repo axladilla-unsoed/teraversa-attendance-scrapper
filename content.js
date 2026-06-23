@@ -45,8 +45,8 @@ function parseDashboard() {
       let hasButton = false;
       let buttonText = "";
       
-      // Memeriksa apakah terdapat tombol "Lihat Presensi"
-      if (link && (link.textContent.includes('Lihat Presensi') || link.href.includes('/manual2/'))) {
+      // Memeriksa apakah terdapat tombol "Lihat Presensi" (dan mengabaikan tombol "Buat Presensi Baru")
+      if (link && link.textContent.includes('Lihat Presensi') && !link.textContent.includes('Buat Presensi Baru')) {
         url = link.href;
         hasButton = true;
         buttonText = link.textContent.trim();
