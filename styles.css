@@ -27,7 +27,7 @@
 }
 
 body {
-  width: 600px;
+  width: 850px;
   max-height: 580px;
   font-family: var(--font-family);
   background-color: var(--bg-primary);
@@ -366,6 +366,18 @@ tr:hover td {
   background-color: rgba(239, 68, 68, 0.15);
   color: var(--accent-danger);
   border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-sakit {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--accent-warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-pending {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .badge-na {

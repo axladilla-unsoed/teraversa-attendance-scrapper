@@ -23,6 +23,7 @@ const tableHeader = document.getElementById('tableHeader');
 const tableBody = document.getElementById('tableBody');
 const btnCopy = document.getElementById('btnCopy');
 const btnDownload = document.getElementById('btnDownload');
+const btnDownloadTSV = document.getElementById('btnDownloadTSV');
 const toast = document.getElementById('toast');
 
 // Inisialisasi: Deteksi Halaman Aktif saat Popup Dibuka
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   searchInput.addEventListener('input', filterTable);
   btnCopy.addEventListener('click', copyToExcel);
   btnDownload.addEventListener('click', downloadCSV);
+  btnDownloadTSV.addEventListener('click', downloadTSV);
 });
 
 /**
@@ -234,12 +236,21 @@ function parseAndAggregateAttendance(htmlText, meetingNum, masterStudents) {
       const statusCell = cells[3];
       let status = 'Tidak Hadir';
       
-      // Cek apakah terdapat badge "hadir"
+      // Cek apakah terdapat badge "hadir", "sakit", atau "pending"
       const badge = statusCell.querySelector('.badge');
       const checkbox = statusCell.querySelector('input[type="checkbox"]');
       
-      if (badge && badge.textContent.toLowerCase().includes('hadir')) {
-        status = 'Hadir';
+      if (badge) {
+        const badgeText = badge.textContent.toLowerCase();
+        if (badgeText.includes('hadir')) {
+          status = 'Hadir';
+        } else if (badgeText.includes('sakit')) {
+          status = 'Sakit';
+        } else if (badgeText.includes('pending') || badgeText.includes('tunda')) {
+          status = 'Pending';
+        } else {
+          status = badge.textContent.trim();
+        }
       } else if (checkbox) {
         status = 'Tidak Hadir';
       } else {
@@ -247,6 +258,10 @@ function parseAndAggregateAttendance(htmlText, meetingNum, masterStudents) {
         const cellText = statusCell.textContent.trim().toLowerCase();
         if (cellText.includes('hadir')) {
           status = 'Hadir';
+        } else if (cellText.includes('sakit')) {
+          status = 'Sakit';
+        } else if (cellText.includes('pending') || cellText.includes('tunda')) {
+          status = 'Pending';
         } else if (cellText.includes('tidak hadir') || cellText.includes('absen') || cellText.includes('alpha')) {
           status = 'Tidak Hadir';
         } else {
@@ -277,6 +292,15 @@ function renderTable() {
     headerHtml += `<th style="text-align: center; width: 25px;" title="Pertemuan ${num}">${num}</th>`;
   });
   
+  // Kolom ringkasan (Summary) kehadiran di akhir
+  headerHtml += `
+    <th style="text-align: center; width: 45px;" title="Persentase Hadir">% H</th>
+    <th style="text-align: center; width: 45px;" title="Persentase Sakit">% S</th>
+    <th style="text-align: center; width: 45px;" title="Persentase Pending">% P</th>
+    <th style="text-align: center; width: 45px;" title="Persentase Alpha">% A</th>
+    <th style="text-align: center; width: 85px;" title="Rekap Kehadiran (Hadir/Sakit/Pending/Alpha)">H/S/P/A</th>
+  `;
+  
   tableHeader.innerHTML = headerHtml;
 
   // 2. Generate Body Table
@@ -295,6 +319,12 @@ function renderTable() {
         <td class="col-nama" title="${student.name}">${student.name}</td>
     `;
 
+    let totalTaught = 0;
+    let countH = 0;
+    let countS = 0;
+    let countP = 0;
+    let countA = 0;
+
     uniqueMeetingNums.forEach(num => {
       const status = student.attendance[num];
       let displayStatus = status;
@@ -303,9 +333,23 @@ function renderTable() {
       if (status === 'Hadir') {
         displayStatus = useAbbr ? 'H' : 'Hadir';
         badgeClass = 'badge-hadir';
+        countH++;
+        totalTaught++;
+      } else if (status === 'Sakit') {
+        displayStatus = useAbbr ? 'S' : 'Sakit';
+        badgeClass = 'badge-sakit';
+        countS++;
+        totalTaught++;
+      } else if (status === 'Pending') {
+        displayStatus = useAbbr ? 'P' : 'Pending';
+        badgeClass = 'badge-pending';
+        countP++;
+        totalTaught++;
       } else if (status === 'Tidak Hadir') {
         displayStatus = useAbbr ? 'A' : 'Tidak Hadir';
         badgeClass = 'badge-absen';
+        countA++;
+        totalTaught++;
       } else {
         displayStatus = '—';
         badgeClass = 'badge-na';
@@ -313,6 +357,21 @@ function renderTable() {
 
       rowHtml += `<td style="text-align: center;"><span class="badge-status ${badgeClass}">${displayStatus}</span></td>`;
     });
+
+    // Hitung persentase kehadiran berdasarkan total pertemuan yang diampu
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
+
+    rowHtml += `
+      <td style="text-align: center; font-weight: 600; color: var(--accent-success);">${pctH}</td>
+      <td style="text-align: center; font-weight: 500; color: var(--accent-warning);">${pctS}</td>
+      <td style="text-align: center; font-weight: 500; color: #818cf8;">${pctP}</td>
+      <td style="text-align: center; font-weight: 500; color: var(--accent-danger);">${pctA}</td>
+      <td style="text-align: center; font-weight: 600; font-family: monospace;">${rekapString}</td>
+    `;
 
     rowHtml += '</tr>';
     bodyHtml += rowHtml;
@@ -347,21 +406,49 @@ function copyToExcel() {
   uniqueMeetingNums.forEach(num => {
     headers.push(`P${num}`);
   });
+  headers.push('% Hadir', '% Sakit', '% Pending', '% Alpha', 'Rekap (H/S/P/A)');
   tsvContent += headers.join('\t') + '\n';
 
   // Data rows
   studentsData.forEach((student, index) => {
     const row = [index + 1, student.nim, student.name];
+    
+    let totalTaught = 0;
+    let countH = 0;
+    let countS = 0;
+    let countP = 0;
+    let countA = 0;
+
     uniqueMeetingNums.forEach(num => {
       const status = student.attendance[num];
       let statusStr = '—';
       if (status === 'Hadir') {
         statusStr = useAbbr ? 'H' : 'Hadir';
+        countH++;
+        totalTaught++;
+      } else if (status === 'Sakit') {
+        statusStr = useAbbr ? 'S' : 'Sakit';
+        countS++;
+        totalTaught++;
+      } else if (status === 'Pending') {
+        statusStr = useAbbr ? 'P' : 'Pending';
+        countP++;
+        totalTaught++;
       } else if (status === 'Tidak Hadir') {
         statusStr = useAbbr ? 'A' : 'Tidak Hadir';
+        countA++;
+        totalTaught++;
       }
       row.push(statusStr);
     });
+
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
+
+    row.push(pctH, pctS, pctP, pctA, rekapString);
     tsvContent += row.join('\t') + '\n';
   });
 
@@ -400,26 +487,54 @@ function downloadCSV() {
   uniqueMeetingNums.forEach(num => {
     headers.push(`Pertemuan ${num}`);
   });
+  headers.push('% Hadir', '% Sakit', '% Pending', '% Alpha', 'Rekap (H/S/P/A)');
   csvContent += headers.map(escapeCSV).join(',') + '\n';
 
   // Data rows
   studentsData.forEach((student, index) => {
     const row = [index + 1, student.nim, student.name];
+    
+    let totalTaught = 0;
+    let countH = 0;
+    let countS = 0;
+    let countP = 0;
+    let countA = 0;
+
     uniqueMeetingNums.forEach(num => {
       const status = student.attendance[num];
       let statusStr = '—';
       if (status === 'Hadir') {
         statusStr = useAbbr ? 'H' : 'Hadir';
+        countH++;
+        totalTaught++;
+      } else if (status === 'Sakit') {
+        statusStr = useAbbr ? 'S' : 'Sakit';
+        countS++;
+        totalTaught++;
+      } else if (status === 'Pending') {
+        statusStr = useAbbr ? 'P' : 'Pending';
+        countP++;
+        totalTaught++;
       } else if (status === 'Tidak Hadir') {
         statusStr = useAbbr ? 'A' : 'Tidak Hadir';
+        countA++;
+        totalTaught++;
       }
       row.push(statusStr);
     });
+
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
+
+    row.push(pctH, pctS, pctP, pctA, rekapString);
     csvContent += row.map(escapeCSV).join(',') + '\n';
   });
 
-  // Trigger download file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // Trigger download file dengan UTF-8 BOM agar Excel dapat menampilkan karakter khusus (seperti em-dash '—') dengan benar
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
@@ -430,6 +545,90 @@ function downloadCSV() {
   document.body.removeChild(link);
   
   showToast("File CSV berhasil diunduh!");
+}
+
+/**
+ * Mengunduh data presensi dalam format file TSV dengan UTF-8 BOM
+ */
+function downloadTSV() {
+  if (studentsData.length === 0) return;
+
+  const useAbbr = toggleAbbr.checked;
+  
+  // Fungsi pembantu untuk mengamankan data TSV dari karakter pemisah
+  const escapeTSV = (val) => {
+    const str = String(val);
+    if (str.includes('\t') || str.includes('\n') || str.includes('"')) {
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+  };
+
+  let tsvContent = '';
+
+  // Header row
+  const headers = ['No', 'NIM', 'Nama'];
+  uniqueMeetingNums.forEach(num => {
+    headers.push(`Pertemuan ${num}`);
+  });
+  headers.push('% Hadir', '% Sakit', '% Pending', '% Alpha', 'Rekap (H/S/P/A)');
+  tsvContent += headers.map(escapeTSV).join('\t') + '\n';
+
+  // Data rows
+  studentsData.forEach((student, index) => {
+    const row = [index + 1, student.nim, student.name];
+    
+    let totalTaught = 0;
+    let countH = 0;
+    let countS = 0;
+    let countP = 0;
+    let countA = 0;
+
+    uniqueMeetingNums.forEach(num => {
+      const status = student.attendance[num];
+      let statusStr = '—';
+      if (status === 'Hadir') {
+        statusStr = useAbbr ? 'H' : 'Hadir';
+        countH++;
+        totalTaught++;
+      } else if (status === 'Sakit') {
+        statusStr = useAbbr ? 'S' : 'Sakit';
+        countS++;
+        totalTaught++;
+      } else if (status === 'Pending') {
+        statusStr = useAbbr ? 'P' : 'Pending';
+        countP++;
+        totalTaught++;
+      } else if (status === 'Tidak Hadir') {
+        statusStr = useAbbr ? 'A' : 'Tidak Hadir';
+        countA++;
+        totalTaught++;
+      }
+      row.push(statusStr);
+    });
+
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
+
+    row.push(pctH, pctS, pctP, pctA, rekapString);
+    tsvContent += row.map(escapeTSV).join('\t') + '\n';
+  });
+
+  // Trigger download file dengan UTF-8 BOM agar Excel dapat menampilkan karakter khusus dengan benar
+  const blob = new Blob(["\uFEFF" + tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Rekap_Kehadiran_Pertemuan_1_${maxMeetingNum}.tsv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast("File TSV berhasil diunduh!");
 }
 
 /**
