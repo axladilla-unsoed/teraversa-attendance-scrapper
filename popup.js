@@ -382,10 +382,10 @@ function renderTable() {
     });
 
     // Hitung persentase kehadiran berdasarkan total pertemuan yang diampu
-    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) : '0';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) : '0';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) : '0';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) : '0';
     const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
 
     rowHtml += `
@@ -465,10 +465,10 @@ function copyToExcel() {
       row.push(statusStr);
     });
 
-    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) : '0';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) : '0';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) : '0';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) : '0';
     const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
 
     row.push(pctH, pctS, pctP, pctA, rekapString);
@@ -546,10 +546,10 @@ function downloadCSV() {
       row.push(statusStr);
     });
 
-    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) : '0';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) : '0';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) : '0';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) : '0';
     const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
 
     row.push(pctH, pctS, pctP, pctA, rekapString);
@@ -630,10 +630,10 @@ function downloadTSV() {
       row.push(statusStr);
     });
 
-    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) + '%' : '0%';
-    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) + '%' : '0%';
+    const pctH = totalTaught > 0 ? ((countH / totalTaught) * 100).toFixed(0) : '0';
+    const pctS = totalTaught > 0 ? ((countS / totalTaught) * 100).toFixed(0) : '0';
+    const pctP = totalTaught > 0 ? ((countP / totalTaught) * 100).toFixed(0) : '0';
+    const pctA = totalTaught > 0 ? ((countA / totalTaught) * 100).toFixed(0) : '0';
     const rekapString = `${countH}/${countS}/${countP}/${countA} dari ${totalTaught}`;
 
     row.push(pctH, pctS, pctP, pctA, rekapString);
