@@ -1,3 +1,11 @@
+// Inisialisasi Tema (dijalankan langsung untuk mencegah kedipan/flash)
+const savedTheme = localStorage.getItem('theme') || 'light';
+if (savedTheme === 'dark') {
+  document.body.classList.add('dark-mode');
+} else {
+  document.body.classList.remove('dark-mode');
+}
+
 // State Global Ekstensi
 let activeTab = null;
 let isMockMode = false;
@@ -28,14 +36,19 @@ const toast = document.getElementById('toast');
 
 // Inisialisasi: Deteksi Halaman Aktif saat Popup Dibuka
 document.addEventListener('DOMContentLoaded', () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs && tabs[0]) {
-      activeTab = tabs[0];
-      checkPageValidity(activeTab.url);
-    } else {
-      showStatus('Halaman tidak terdeteksi', 'warn');
-    }
-  });
+  if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        activeTab = tabs[0];
+        checkPageValidity(activeTab.url);
+      } else {
+        showStatus('Halaman tidak terdeteksi', 'warn');
+      }
+    });
+  } else {
+    showStatus('Mode Standalone (Pengujian)', 'ready');
+    if (btnScrape) btnScrape.removeAttribute('disabled');
+  }
 
   // Event Listeners
   btnScrape.addEventListener('click', startScraping);
@@ -44,6 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCopy.addEventListener('click', copyToExcel);
   btnDownload.addEventListener('click', downloadCSV);
   btnDownloadTSV.addEventListener('click', downloadTSV);
+
+  // Event Listener untuk Toggle Tema
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  }
 });
 
 /**

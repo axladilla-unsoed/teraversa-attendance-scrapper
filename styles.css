@@ -1,5 +1,42 @@
 /* Design System & Variables */
 :root {
+  --bg-primary: #f8fafc; /* Slate 50 */
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-hover: rgba(241, 245, 249, 0.8); /* Slate 100 */
+  --border-color: rgba(0, 0, 0, 0.08);
+  
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-muted: #94a3b8; /* Slate 400 */
+  
+  --accent-primary: #4f46e5; /* Indigo 600 */
+  --accent-secondary: #2563eb; /* Blue 600 */
+  --accent-success: #059669; /* Emerald 600 */
+  --accent-danger: #dc2626; /* Red 600 */
+  --accent-warning: #d97706; /* Amber 600 */
+  
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Component variables */
+  --scrollbar-thumb: #cbd5e1; /* Slate 300 */
+  --scrollbar-track: #f8fafc;
+  --brand-gradient-start: #0f172a;
+  --brand-gradient-end: #2563eb;
+  --bg-status-badge: rgba(241, 245, 249, 0.9);
+  --btn-disabled-bg: #e2e8f0; /* Slate 200 */
+  --toggle-slider-bg: #cbd5e1; /* Slate 300 */
+  --progress-track-bg: #e2e8f0;
+  --search-bg: rgba(255, 255, 255, 0.9);
+  --table-wrapper-bg: rgba(255, 255, 255, 0.5);
+  --th-bg: #f1f5f9;
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-hover-bg: #e2e8f0;
+  --toast-bg: #0f172a;
+  --td-border: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode {
   --bg-primary: #0b0f19;
   --bg-card: rgba(17, 24, 39, 0.75);
   --bg-hover: rgba(31, 41, 55, 0.5);
@@ -9,14 +46,30 @@
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
   
-  --accent-primary: #6366f1; /* Indigo */
-  --accent-secondary: #3b82f6; /* Blue */
-  --accent-success: #10b981; /* Emerald Green */
-  --accent-danger: #ef4444; /* Rose Red */
-  --accent-warning: #f59e0b; /* Amber */
+  --accent-primary: #6366f1; /* Indigo 500 */
+  --accent-secondary: #3b82f6; /* Blue 500 */
+  --accent-success: #10b981; /* Emerald 500 */
+  --accent-danger: #ef4444; /* Red 500 */
+  --accent-warning: #f59e0b; /* Amber 500 */
   
   --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Component variables */
+  --scrollbar-thumb: #1e293b;
+  --scrollbar-track: var(--bg-primary);
+  --brand-gradient-start: #ffffff;
+  --brand-gradient-end: #93c5fd;
+  --bg-status-badge: rgba(31, 41, 55, 0.8);
+  --btn-disabled-bg: #1f2937;
+  --toggle-slider-bg: #374151;
+  --progress-track-bg: #1f2937;
+  --search-bg: rgba(17, 24, 39, 0.9);
+  --table-wrapper-bg: rgba(17, 24, 39, 0.4);
+  --th-bg: #111827;
+  --btn-secondary-bg: #1e293b;
+  --btn-secondary-hover-bg: #334155;
+  --toast-bg: #1f2937;
+  --td-border: rgba(255, 255, 255, 0.04);
 }
 
 /* Reset & Container */
@@ -42,14 +95,14 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--btn-secondary-hover-bg);
 }
 
 /* Glassmorphism Panel */
@@ -97,7 +150,7 @@ body {
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  background: linear-gradient(to right, #ffffff, #93c5fd);
+  background: linear-gradient(to right, var(--brand-gradient-start), var(--brand-gradient-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -111,7 +164,7 @@ body {
   font-weight: 500;
   padding: 4px 10px;
   border-radius: 20px;
-  background-color: rgba(31, 41, 55, 0.8);
+  background-color: var(--bg-status-badge);
   border: 1px solid var(--border-color);
 }
 
@@ -174,7 +227,7 @@ body {
 }
 
 .btn-primary:disabled {
-  background: #1f2937;
+  background: var(--btn-disabled-bg);
   color: var(--text-muted);
   cursor: not-allowed;
   box-shadow: none;
@@ -206,7 +259,7 @@ body {
   position: relative;
   width: 28px;
   height: 16px;
-  background-color: #374151;
+  background-color: var(--toggle-slider-bg);
   border-radius: 20px;
   transition: 0.2s;
 }
@@ -247,7 +300,7 @@ body {
 .progress-track {
   width: 100%;
   height: 6px;
-  background-color: #1f2937;
+  background-color: var(--progress-track-bg);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -270,7 +323,7 @@ body {
 .search-input {
   width: 100%;
   padding: 8px 12px 8px 32px;
-  background-color: rgba(17, 24, 39, 0.9);
+  background-color: var(--search-bg);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
@@ -306,7 +359,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 12px;
-  background-color: rgba(17, 24, 39, 0.4);
+  background-color: var(--table-wrapper-bg);
 }
 
 table {
@@ -319,7 +372,7 @@ table {
 th {
   position: sticky;
   top: 0;
-  background-color: #111827;
+  background-color: var(--th-bg);
   color: var(--text-primary);
   font-weight: 600;
   padding: 8px 10px;
@@ -329,7 +382,7 @@ th {
 
 td {
   padding: 8px 10px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.04);
+  border-bottom: 1px dashed var(--td-border);
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -395,7 +448,7 @@ tr:hover td {
 .btn-secondary {
   flex: 1;
   padding: 8px 14px;
-  background-color: #1e293b;
+  background-color: var(--btn-secondary-bg);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
@@ -410,12 +463,12 @@ tr:hover td {
 }
 
 .btn-secondary:hover {
-  background-color: #334155;
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--btn-secondary-hover-bg);
+  border-color: var(--border-color);
 }
 
 .btn-secondary:active {
-  background-color: #1e293b;
+  background-color: var(--btn-secondary-bg);
 }
 
 /* Notification Popups */
@@ -424,7 +477,7 @@ tr:hover td {
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background-color: #1f2937;
+  background-color: var(--toast-bg);
   border: 1px solid var(--accent-primary);
   color: var(--text-primary);
   padding: 8px 16px;
@@ -462,4 +515,60 @@ tr:hover td {
 
 .help-list li {
   margin-bottom: 4px;
+}
+
+/* Header Actions & Theme Toggle */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle-btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--btn-secondary-hover-bg);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-btn .sun-icon {
+  display: none;
+}
+
+.theme-toggle-btn .moon-icon {
+  display: block;
+}
+
+body.dark-mode .theme-toggle-btn .sun-icon {
+  display: block;
+}
+
+body.dark-mode .theme-toggle-btn .moon-icon {
+  display: none;
+}
+
+/* Smooth transitions for theme changing */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.panel, .status-badge, .search-input, .table-wrapper, th, td, .btn-secondary, .toggle-slider {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
