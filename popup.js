@@ -36,21 +36,109 @@ const toast = document.getElementById('toast');
 
 // Inisialisasi: Deteksi Halaman Aktif saat Popup Dibuka
 document.addEventListener('DOMContentLoaded', () => {
-  if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs && tabs[0]) {
-        activeTab = tabs[0];
-        checkPageValidity(activeTab.url);
-      } else {
-        showStatus('Halaman tidak terdeteksi', 'warn');
-      }
-    });
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabIdParam = urlParams.get('tabId');
+  const toggleTabMode = document.getElementById('toggleTabMode');
+
+  if (tabIdParam) {
+    // Berjalan di Tab Mode
+    document.body.classList.add('tab-mode');
+    
+    if (toggleTabMode) {
+      toggleTabMode.checked = true;
+      toggleTabMode.addEventListener('change', () => {
+        localStorage.setItem('openInTab', toggleTabMode.checked ? 'true' : 'false');
+      });
+    }
+
+    const parsedTabId = parseInt(tabIdParam, 10);
+    if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.get) {
+      chrome.tabs.get(parsedTabId, (tab) => {
+        if (chrome.runtime.lastError || !tab) {
+          showStatus('Tab asli tertutup/tidak valid (Mode Tab)', 'warn');
+        } else {
+          activeTab = tab;
+          checkPageValidity(activeTab.url);
+        }
+      });
+    } else {
+      showStatus('Mode Standalone (Pengujian)', 'ready');
+      if (btnScrape) btnScrape.removeAttribute('disabled');
+    }
   } else {
-    showStatus('Mode Standalone (Pengujian)', 'ready');
-    if (btnScrape) btnScrape.removeAttribute('disabled');
+    // Berjalan di Popup Mode Biasa
+    const openInTab = localStorage.getItem('openInTab') === 'true';
+
+    if (openInTab && typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          const activeTabInfo = tabs[0];
+
+          // Cari apakah ada tab ekstensi yang sudah terbuka sebelumnya
+          chrome.tabs.query({}, (allTabs) => {
+            const extensionTab = allTabs.find(t => t.url && t.url.startsWith(chrome.runtime.getURL("popup.html")));
+            if (extensionTab) {
+              chrome.tabs.update(extensionTab.id, {
+                url: chrome.runtime.getURL(`popup.html?tabId=${activeTabInfo.id}`),
+                active: true
+              });
+            } else {
+              chrome.tabs.create({
+                url: chrome.runtime.getURL(`popup.html?tabId=${activeTabInfo.id}`)
+              });
+            }
+            window.close();
+          });
+        }
+      });
+      return; // Batalkan inisialisasi popup karena akan ditutup
+    }
+
+    if (toggleTabMode) {
+      toggleTabMode.checked = openInTab;
+      toggleTabMode.addEventListener('change', () => {
+        const isChecked = toggleTabMode.checked;
+        localStorage.setItem('openInTab', isChecked ? 'true' : 'false');
+        if (isChecked && typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs && tabs[0]) {
+              // Cari apakah ada tab ekstensi yang sudah terbuka sebelumnya
+              chrome.tabs.query({}, (allTabs) => {
+                const extensionTab = allTabs.find(t => t.url && t.url.startsWith(chrome.runtime.getURL("popup.html")));
+                if (extensionTab) {
+                  chrome.tabs.update(extensionTab.id, {
+                    url: chrome.runtime.getURL(`popup.html?tabId=${tabs[0].id}`),
+                    active: true
+                  });
+                } else {
+                  chrome.tabs.create({
+                    url: chrome.runtime.getURL(`popup.html?tabId=${tabs[0].id}`)
+                  });
+                }
+                window.close();
+              });
+            }
+          });
+        }
+      });
+    }
+
+    if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          activeTab = tabs[0];
+          checkPageValidity(activeTab.url);
+        } else {
+          showStatus('Halaman tidak terdeteksi', 'warn');
+        }
+      });
+    } else {
+      showStatus('Mode Standalone (Pengujian)', 'ready');
+      if (btnScrape) btnScrape.removeAttribute('disabled');
+    }
   }
 
-  // Event Listeners
+  // Event Listeners umum
   btnScrape.addEventListener('click', startScraping);
   toggleAbbr.addEventListener('change', renderTable);
   searchInput.addEventListener('input', filterTable);
@@ -79,12 +167,15 @@ function checkPageValidity(url) {
   const isTeraversaDashboard = url.includes('teraversa.unsoed.ac.id/dosen/prdosen');
   const isLocalMock = url.startsWith('file://') && url.includes('contoh_halaman_awal.html');
 
+  const inTabMode = document.body.classList.contains('tab-mode');
+  const suffix = inTabMode ? ' (Mode Tab)' : '';
+
   if (isTeraversaDashboard || isLocalMock) {
     isMockMode = isLocalMock;
-    showStatus('Halaman Siap', 'ready');
+    showStatus('Halaman Siap' + suffix, 'ready');
     btnScrape.removeAttribute('disabled');
   } else {
-    showStatus('Buka halaman presensi', 'warn');
+    showStatus('Buka halaman presensi' + suffix, 'warn');
     btnScrape.setAttribute('disabled', 'true');
   }
 }
